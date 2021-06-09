@@ -1,6 +1,8 @@
 const express = require('express')
+const cors = require('cors')
 const app = express()
 
+app.use(cors())
 app.use(express.json())
 
 app.use((req, res, next) => {
@@ -68,10 +70,7 @@ app.post('/api/notes', (req, res) => {
 
   initialNotes = [...initialNotes, noteToCreate]
 
-  res.status(201).send({
-    message: 'Note created success',
-    data: noteToCreate
-  })
+  res.status(201).send(noteToCreate)
 })
 
 app.delete('/api/notes/:id', (req, res) => {
