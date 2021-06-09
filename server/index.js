@@ -84,4 +84,4 @@ app.use((req, res) => {
   res.status(404).send({ error: '404 not found' })
 })
 
-app.listen(3001, () => console.log('Server on http://localhost:3001/'))
+app.listen(process.env.PORT || 3001, () => console.log('Server on http://localhost:3001/'))
