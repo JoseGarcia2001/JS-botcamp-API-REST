@@ -70,4 +70,6 @@ app.use(manageError)
 
 app.use(manage404)
 
-app.listen(process.env.PORT, () => console.log('Server on http://localhost:3001/'))
+const server = app.listen(process.env.PORT, () => console.log('Server on http://localhost:3001/'))
+
+module.exports = { app, server }
