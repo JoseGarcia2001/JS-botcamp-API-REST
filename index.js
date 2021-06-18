@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 app.get('/api/notes', (req, res, next) => {
   Note
     .find({})
-    .then((listOfNotes) => res.json(listOfNotes))
+    .then((listOfNotes) => res.status(200).json(listOfNotes))
     .catch(error => next(error))
 })
 
@@ -58,10 +58,10 @@ app.delete('/api/notes/:id', (req, res, next) => {
 
 app.put('/api/notes/:id', (req, res, next) => {
   const { id } = req.params
-  const { content, important } = req.body
+  const propToUpdate = req.body
 
   Note
-    .findByIdAndUpdate(id, { content, important }, { new: true })
+    .findByIdAndUpdate(id, { ...propToUpdate }, { new: true })
     .then(noteUpdated => res.json(noteUpdated))
     .catch(error => next(error))
 })
