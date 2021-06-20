@@ -8,7 +8,8 @@ mongoose
   .connect(connectionString, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useCreateIndex: true
+    useCreateIndex: true,
+    useFindAndModify: false
   })
   .then(() => console.log('success connection'))
   .catch((err) => console.log(err))

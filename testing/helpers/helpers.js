@@ -1,4 +1,5 @@
-const Notes = require('../../models/Note')
+const Note = require('../../models/Note')
+const User = require('../../models/User')
 const mongoose = require('mongoose')
 const { server } = require('../../index')
 const supertest = require('supertest')
@@ -25,11 +26,19 @@ const initialNotes = [
 
 ]
 
+const getUserId = async () => {
+  const users = await User.find({})
+  const userId = users[0].id
+  return userId
+}
+
 const createInitialNotes = async () => {
-  await Notes.deleteMany({})
+  await Note.deleteMany({})
+
+  const userId = await getUserId()
 
   for (const note of initialNotes) {
-    await Notes.create(note)
+    await Note.create({ ...note, user: userId })
   }
 }
 
@@ -43,9 +52,17 @@ const getAllNotes = async () => {
   return { notes, contents: notes.map(note => note.content) }
 }
 
+const getAllUsers = async () => {
+  const { body: users } = await api.get('/api/users')
+  return users
+}
+
 module.exports = {
+  api,
   createInitialNotes,
   clearOpenConnections,
   initialNotes,
-  getAllNotes
+  getAllNotes,
+  getAllUsers,
+  getUserId
 }

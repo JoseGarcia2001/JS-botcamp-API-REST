@@ -4,7 +4,8 @@ const { Schema, model } = require('mongoose')
 const noteSchema = Schema({
   content: { type: String, required: true },
   date: { type: Date, default: new Date() },
-  important: Boolean
+  important: Boolean,
+  user: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 })
 
 // Config format of response for the client

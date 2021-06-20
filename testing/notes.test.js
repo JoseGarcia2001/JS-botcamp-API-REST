@@ -1,13 +1,11 @@
-const supertest = require('supertest')
-const { app } = require('../index')
 const {
+  api,
   createInitialNotes,
   clearOpenConnections,
   getAllNotes,
+  getUserId,
   initialNotes
 } = require('./helpers/helpers')
-
-const api = supertest(app)
 
 beforeEach(createInitialNotes)
 
@@ -30,13 +28,21 @@ describe('GET /api/notes', () => {
   })
 
   test('Get one note by ID', async () => {
-    const { notes } = await getAllNotes()
+    const { notes, contents } = await getAllNotes()
     const note = notes[0]
+    const content = contents[0]
     const { body: noteExpected } = await api.get(`/api/notes/${note.id}`)
-    expect(noteExpected).toEqual(note)
+    expect(noteExpected.content).toEqual(content)
   })
 
-  test('Get one note with bad ID', async () => {
+  test('Get one note with bad ID format', async () => {
+    await api
+      .get('/api/notes/60ce9046f2ce4d323d77711b')
+      .expect(400)
+      .expect({ error: 'Invalid ID' })
+  })
+
+  test('Get one note with non-existent ID', async () => {
     await api
       .get('/api/notes/123')
       .expect(400)
@@ -46,9 +52,10 @@ describe('GET /api/notes', () => {
 
 describe('POST /api/notes', () => {
   test('Create one note success', async () => {
+    const user = await getUserId()
     const { body: createdNote } = await api
       .post('/api/notes')
-      .send({ content: 'note of test', important: true })
+      .send({ content: 'note of test', important: true, user })
       .expect(201)
 
     const { contents, notes } = await getAllNotes()
@@ -57,9 +64,11 @@ describe('POST /api/notes', () => {
   })
 
   test('Create one note without important success', async () => {
+    const user = await getUserId()
+
     const { body: createdNote } = await api
       .post('/api/notes')
-      .send({ content: 'note of test' })
+      .send({ content: 'note of test', user })
       .expect(201)
 
     const { contents, notes } = await getAllNotes()

@@ -9,7 +9,9 @@ const cors = require('cors')
 const manageError = require('./middleware/manageError')
 const manage404 = require('./middleware/manage404')
 const app = express()
-const Note = require('./models/Note')
+const notesRouter = require('./controllers/notes')
+const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 
 app.use(cors())
 app.use(express.json())
@@ -18,58 +20,23 @@ app.use('/static', express.static(path.join(__dirname, 'public')))
 app.get('/', (req, res) => {
   res.send('<h1>Hello world</h1>')
 })
+// Notes Router
+app.use('/api/notes', notesRouter)
 
-app.get('/api/notes', (req, res, next) => {
-  Note
-    .find({})
-    .then((listOfNotes) => res.status(200).json(listOfNotes))
-    .catch(error => next(error))
-})
+// Users Router
+app.use('/api/users', usersRouter)
 
-app.get('/api/notes/:id', (req, res, next) => {
-  const id = req.params.id
-  Note
-    .findById(id)
-    .then(note => res.json(note))
-    .catch(error => next(error))
-})
-
-app.post('/api/notes', (req, res, next) => {
-  const { content, important } = req.body
-
-  const noteToCreate = {
-    content,
-    important: typeof important !== 'boolean' ? false : important
-  }
-
-  Note
-    .create(noteToCreate)
-    .then(noteCreated => res.status(201).send(noteCreated))
-    .catch(error => next(error))
-})
-
-app.delete('/api/notes/:id', (req, res, next) => {
-  const id = req.params.id
-  Note
-    .findByIdAndDelete(id)
-    .then(noteDeleted => res.json({ response: 'Element deleted success', noteDeleted }))
-    .catch(error => next(error))
-})
-
-app.put('/api/notes/:id', (req, res, next) => {
-  const { id } = req.params
-  const propToUpdate = req.body
-
-  Note
-    .findByIdAndUpdate(id, { ...propToUpdate }, { new: true })
-    .then(noteUpdated => res.json(noteUpdated))
-    .catch(error => next(error))
-})
+// Login Router
+app.use('/api/login', loginRouter)
 
 app.use(manageError)
 
 app.use(manage404)
 
-const server = app.listen(process.env.PORT, () => console.log('Server on http://localhost:3001/'))
+const server = app.listen(process.env.PORT, () =>
+  console.log(`Server on http://localhost:${process.env.PORT}/`
+  ))
+
+process.on('uncaughtException', () => server.close())
 
 module.exports = { app, server }
