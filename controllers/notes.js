@@ -1,6 +1,7 @@
 const notesRouter = require('express').Router()
 const Note = require('../models/Note')
 const User = require('../models/User')
+const jwtSecurity = require('../middleware/jwtSecurity')
 
 notesRouter.get('/', async (req, res, next) => {
   try {
@@ -24,18 +25,19 @@ notesRouter.get('/:id', async (req, res, next) => {
   }
 })
 
-notesRouter.post('/', async (req, res, next) => {
+notesRouter.post('/', jwtSecurity, async (req, res, next) => {
   try {
-    const { content, important, user } = req.body
+    const { content, important } = req.body
+    const { userId } = req
     const noteToCreate = {
       content,
       important: typeof important !== 'boolean' ? false : important,
-      user
+      user: userId
     }
 
     const createdNote = await Note.create(noteToCreate)
     // Save ref of created note to their user
-    const ownerUser = await User.findById(user)
+    const ownerUser = await User.findById(userId)
     ownerUser.notes.push(createdNote.id)
     ownerUser.save()
 
@@ -45,7 +47,7 @@ notesRouter.post('/', async (req, res, next) => {
   }
 })
 
-notesRouter.delete('/:id', async (req, res, next) => {
+notesRouter.delete('/:id', jwtSecurity, async (req, res, next) => {
   try {
     const id = req.params.id
     const noteDeleted = await Note.findByIdAndDelete(id)
@@ -55,7 +57,7 @@ notesRouter.delete('/:id', async (req, res, next) => {
   }
 })
 
-notesRouter.put('/:id', async (req, res, next) => {
+notesRouter.put('/:id', jwtSecurity, async (req, res, next) => {
   try {
     const { id } = req.params
     const propToUpdate = req.body

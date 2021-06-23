@@ -29,15 +29,14 @@ usersRouter.get('/:id', async (req, res, next) => {
 usersRouter.post('/', async (req, res, next) => {
   try {
     const { username, password, name } = req.body
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const SALT_ROUNDS = 10
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
 
-    const user = new User({
+    const createdUser = await User.create({
       name,
       username,
       password: hashedPassword
     })
-
-    const createdUser = await user.save()
 
     res.status(201).json(createdUser)
   } catch (error) {

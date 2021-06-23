@@ -1,17 +1,34 @@
+const ERROR_HANDLERS = {
+
+  CastError: (res) =>
+    res.status(400).send({ error: 'Bad id format' }),
+
+  ValidationError: (res) =>
+    res.status(400).send({ error: 'Validation failed, request format completed' }),
+
+  Error: (res) =>
+    res.status(400).send({ error: 'Validation failed, request format completed' }),
+
+  MongoError: (res) =>
+    res.status(400).send({ error: 'User already taken' }),
+
+  JsonWebTokenError: (res, err) =>
+    res.status(401).send({ error: err.message }),
+
+  defaultError: (res) =>
+    res.status(500).end(),
+
+  TokenExpiredError: (res, err) =>
+    res.status(401).json({ error: err.message })
+}
+
 const manageError = (err, req, res, next) => {
+  console.log(err.name)
+  console.log(err.message)
   console.log(err)
-  // Request with bad ID
-  if (err.name === 'CastError') {
-    res.status(400).send({ error: 'Bad id format' })
-  }
-  // Not schema completed
-  if (err.name === 'ValidationError' || err.name === 'Error') {
-    res.status(400).send({ error: 'Validation failed, request format not completed' })
-  }
-  if (err.name === 'MongoError') {
-    res.status(400).send({ error: 'User already taken' })
-  }
-  res.status(500).end()
+
+  const handler = ERROR_HANDLERS[err.name] || ERROR_HANDLERS.defaultError
+  handler(res, err)
 }
 
 module.exports = manageError
